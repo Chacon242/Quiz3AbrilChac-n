@@ -1,0 +1,33 @@
+name: Laravel
+
+on:
+  push:
+    branches: [ "main", "casoestudio3-C4E107-branch" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  laravel-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.5'
+      - uses: actions/checkout@v4
+      - name: Copiar .env
+        run: php -r "file_exists('.env') || copy('.env.example', '.env');"
+      - name: Instalar dependencias
+        run: composer install -q --no-ansi --no-interaction --no-progress --prefer-dist
+      - name: Generar llave
+        run: php artisan key:generate
+      - name: Permisos
+        run: chmod -R 777 storage bootstrap/cache
+      - name: Crear base de datos SQLite
+        run: |
+          mkdir -p database
+          touch database/database.sqlite
+      - name: Ejecutar pruebas
+        env:
+          DB_CONNECTION: sqlite
+          DB_DATABASE: database/database.sqlite
+        run: php artisan test
