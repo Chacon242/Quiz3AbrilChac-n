@@ -3,15 +3,21 @@
 namespace App\Models;
 
 use DomainException;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use InvalidArgumentException;
 
 class Grupo extends Model
 {
+    use HasFactory;
+
     public const docentes_minimos = 1;
     public const docentes_maximos = 2;
     public const estudiantes_minimos = 15;
+    public const nota_minima = 0;
+    public const nota_maxima = 10;
 
     protected $table = 'grupos';
 
@@ -36,11 +42,12 @@ class Grupo extends Model
 
     public function estudiantes(): BelongsToMany
     {
-        return $this->belongsToMany(Estudiante::class, 'estudiante_matriculado')
+        return $this->belongsToMany(Estudiante::class, 'estudiantes_matriculados')
             ->using(EstudianteMatriculado::class)
             ->withPivot('nota')
             ->withTimestamps();
     }
+
     public function asignarDocente(Docente|int $profe): void
     {
         if (is_int($profe)) {
@@ -58,7 +65,15 @@ class Grupo extends Model
         $this->docentes()->attach($profe->id);
     }
 
-     public function abrir(): void
+    public function puedeAbrirse(): bool
+    {
+        $tieneDocente = $this->docentes()->count() >= self::docentes_minimos;
+        $tieneCupo = $this->estudiantes()->count() >= self::estudiantes_minimos;
+
+        return $tieneDocente && $tieneCupo;
+    }
+
+    public function abrir(): void
     {
         if (! $this->puedeAbrirse()) {
             throw new DomainException(
@@ -69,12 +84,19 @@ class Grupo extends Model
         $this->abierto = true;
         $this->save();
     }
-    public function puedeAbrirse(): bool
-{
-    $tieneDocente = $this->docentes()->count() >= self::docentes_minimos;
-    $tieneCupo = $this->estudiantes()->count() >= self::estudiantes_minimos;
 
-    return $tieneDocente && $tieneCupo;
-}
-   
+    public function registrarNota(Estudiante $estudiante, float $nota): void
+    {
+        if ($nota < self::nota_minima || $nota > self::nota_maxima) {
+            throw new InvalidArgumentException('La nota tiene que estar entre 0 y 10.');
+        }
+
+        $filas = EstudianteMatriculado::where('grupo_id', $this->id)
+            ->where('estudiante_id', $estudiante->id)
+            ->update(['nota' => $nota]);
+
+        if ($filas === 0) {
+            throw new DomainException('El estudiante no está matriculado en este grupo.');
+        }
+    }
 }

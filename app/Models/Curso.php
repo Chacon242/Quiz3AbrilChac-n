@@ -2,12 +2,15 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Curso extends Model
 {
-   protected $table = 'cursos';
+   use HasFactory;
+
+    protected $table = 'cursos';
 
     protected $fillable = ['sigla', 'nombre_curso', 'creditos'];
 

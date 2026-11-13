@@ -96,7 +96,7 @@ class GrupoTest extends TestCase
 
         $this->assertSame('Abril', $primero->consejero->nombre_empleado);
 
-        $this->assertDatabaseHas('estudiante_matriculado', [
+        $this->assertDatabaseHas('estudiantes_matriculados', [
             'grupo_id' => $grupo->id,
             'estudiante_id' => $primero->id,
         ]);
