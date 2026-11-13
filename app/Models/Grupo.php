@@ -13,25 +13,10 @@ class Grupo extends Model
 {
     use HasFactory;
 
-            /** @pest-mutate-ignore */
-    public const docentes_minimos = 1;
-
-    /** @pest-mutate-ignore */
-    public const docentes_maximos = 2;
-
-    /** @pest-mutate-ignore */
-    public const estudiantes_minimos = 15;
-
-    /** @pest-mutate-ignore */
-    public const nota_minima = 0;
-
-    /** @pest-mutate-ignore */
-    public const nota_maxima = 10;
-
     protected $table = 'grupos';
 
-    /** @pest-mutate-ignore */
     protected $fillable = ['curso_id', 'numero_ciclo', 'ano', 'numero_grupo', 'abierto'];
+
     protected function casts(): array
     {
         return [
@@ -67,7 +52,7 @@ class Grupo extends Model
             return;
         }
 
-        if ($this->docentes()->count() >= self::docentes_maximos) {
+        if ($this->docentes()->count() >= $this->docentesMaximos()) {
             throw new DomainException('El grupo ya tiene a los dos docentes asignados.');
         }
 
@@ -76,8 +61,8 @@ class Grupo extends Model
 
     public function puedeAbrirse(): bool
     {
-        $tieneDocente = $this->docentes()->count() >= self::docentes_minimos;
-        $tieneCupo = $this->estudiantes()->count() >= self::estudiantes_minimos;
+        $tieneDocente = $this->docentes()->count() >= $this->docentesMinimos();
+        $tieneCupo = $this->estudiantes()->count() >= $this->estudiantesMinimos();
 
         return $tieneDocente && $tieneCupo;
     }
@@ -96,7 +81,7 @@ class Grupo extends Model
 
     public function registrarNota(Estudiante $estudiante, float $nota): void
     {
-        if ($nota < self::nota_minima || $nota > self::nota_maxima) {
+        if ($nota < $this->notaMinima() || $nota > $this->notaMaxima()) {
             throw new InvalidArgumentException('La nota tiene que estar entre 0 y 10.');
         }
 
@@ -107,5 +92,30 @@ class Grupo extends Model
         if ($filas === 0) {
             throw new DomainException('El estudiante no está matriculado en este grupo.');
         }
+    }
+
+    private function docentesMinimos(): int
+    {
+        return 1;
+    }
+
+    private function docentesMaximos(): int
+    {
+        return 2;
+    }
+
+    private function estudiantesMinimos(): int
+    {
+        return 15;
+    }
+
+    private function notaMinima(): float
+    {
+        return 0;
+    }
+
+    private function notaMaxima(): float
+    {
+        return 10;
     }
 }
