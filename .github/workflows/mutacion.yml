@@ -21,4 +21,4 @@ jobs:
       - name: Generar llave
         run: php artisan key:generate
       - name: Pruebas de mutacion
-        run: vendor/bin/pest --mutate --class="App\Models\Grupo"
+        run: vendor/bin/pest --mutate --class="App\Models\Grupo" --min=80

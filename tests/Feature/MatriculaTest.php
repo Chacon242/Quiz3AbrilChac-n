@@ -240,3 +240,23 @@ test('CP-13 un estudiante no se matricula dos veces en el mismo grupo', function
         ->where('estudiante_id', $maria->id)
         ->count())->toBe(1);
 });
+
+test('C3-01 acepta las notas límite 0 y 10', function (float $nota) {
+    $grupo = crearGrupo($this->curso);
+    $maria = crearMaria($this->ana);
+    $grupo->estudiantes()->attach($maria->id);
+
+    $grupo->registrarNota($maria, $nota);
+
+    expect(matriculaDe($grupo, $maria)->nota)->toBe($nota);
+})->with([0.0, 10.0]);
+
+test('C3-02 no registra nota a un estudiante no matriculado', function () {
+    $grupo = crearGrupo($this->curso);
+    $maria = crearMaria($this->ana);
+
+    expect(fn () => $grupo->registrarNota($maria, 7.0))
+        ->toThrow(DomainException::class);
+
+    $this->assertDatabaseCount('estudiantes_matriculados', 0);
+});

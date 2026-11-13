@@ -13,15 +13,15 @@ class Grupo extends Model
 {
     use HasFactory;
 
-    public const docentes_minimos = 1;
-    public const docentes_maximos = 2;
-    public const estudiantes_minimos = 15;
-    public const nota_minima = 0;
-    public const nota_maxima = 10;
+        public const docentes_minimos = 1; 
+    public const docentes_maximos = 2; 
+    public const estudiantes_minimos = 15; 
+    public const nota_minima = 0; 
+    public const nota_maxima = 10; 
 
     protected $table = 'grupos';
 
-    protected $fillable = ['curso_id', 'numero_ciclo', 'ano', 'numero_grupo', 'abierto'];
+    protected $fillable = ['curso_id', 'numero_ciclo', 'ano', 'numero_grupo', 'abierto']; 
 
     protected function casts(): array
     {
