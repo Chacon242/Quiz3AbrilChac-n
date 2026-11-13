@@ -1,0 +1,24 @@
+name: Mutacion
+
+on:
+  push:
+    branches: [ "casoestudio3-C4E107-branch" ]
+  workflow_dispatch:
+
+jobs:
+  mutacion:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          coverage: xdebug
+      - uses: actions/checkout@v4
+      - name: Copiar .env
+        run: php -r "file_exists('.env') || copy('.env.example', '.env');"
+      - name: Instalar dependencias
+        run: composer install -q --no-ansi --no-interaction --no-progress --prefer-dist
+      - name: Generar llave
+        run: php artisan key:generate
+      - name: Pruebas de mutacion
+        run: vendor/bin/pest --mutate --class="App\Models\Grupo"
